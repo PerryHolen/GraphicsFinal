@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="drawstuff">
+			<UniqueIdentifier>{39D2F7FB-3478-994B-9B10-5CF77D1D243B}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="drawstuff\src">
+			<UniqueIdentifier>{A79D001E-1CA0-FF43-8907-8332156D83FB}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="ode">
+			<UniqueIdentifier>{0218A8EE-C47C-2149-8BDF-9E4BBD9736A5}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="ode\demo">
+			<UniqueIdentifier>{2CB5BF8F-A24A-EE49-9E4D-76DDF4FE8EA0}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\ode\demo\demo_boxstack.cpp">
+			<Filter>ode\demo</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ResourceCompile Include="..\..\drawstuff\src\resources.rc">
+			<Filter>drawstuff\src</Filter>
+		</ResourceCompile>
+	</ItemGroup>
+</Project>

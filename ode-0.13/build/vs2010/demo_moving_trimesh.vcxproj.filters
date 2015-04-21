@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="drawstuff">
+			<UniqueIdentifier>{018E7CB3-6F80-1348-AF67-D6826E935905}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="drawstuff\src">
+			<UniqueIdentifier>{6F4A196B-2141-E842-9FD0-33363A19CDAD}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="ode">
+			<UniqueIdentifier>{F10D4CDF-CF05-A548-A593-32F5B5A39F48}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="ode\demo">
+			<UniqueIdentifier>{053F707A-F604-3549-AD2E-D2C931404A7B}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\ode\demo\demo_moving_trimesh.cpp">
+			<Filter>ode\demo</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ResourceCompile Include="..\..\drawstuff\src\resources.rc">
+			<Filter>drawstuff\src</Filter>
+		</ResourceCompile>
+	</ItemGroup>
+</Project>

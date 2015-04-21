@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ode">
+      <UniqueIdentifier>{2d237e86-9b72-4200-9294-e55af5225fe2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ode\demo">
+      <UniqueIdentifier>{7e30aded-cc15-4b60-ad07-5c5ede7080ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drawstuff">
+      <UniqueIdentifier>{6fcb5783-3c6c-448d-b785-5b641c43b76b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drawstuff\src">
+      <UniqueIdentifier>{9eef1000-f168-4f44-b763-d864379c8ba4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\ode\demo\demo_motor.cpp">
+      <Filter>ode\demo</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\drawstuff\src\resources.rc">
+      <Filter>drawstuff\src</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

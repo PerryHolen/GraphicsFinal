@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="drawstuff">
+			<UniqueIdentifier>{0FC6716B-CC6B-D249-9DF6-280F5E027CC6}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="drawstuff\src">
+			<UniqueIdentifier>{078A1D8D-64B6-9A48-B2D3-FA2A8B9145E9}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="ode">
+			<UniqueIdentifier>{5CFAB260-E379-8045-BBFE-3D3E0D955462}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="ode\demo">
+			<UniqueIdentifier>{232D50D1-EE89-7142-A746-6D5DC79728A0}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\ode\demo\demo_dhinge.cpp">
+			<Filter>ode\demo</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ResourceCompile Include="..\..\drawstuff\src\resources.rc">
+			<Filter>drawstuff\src</Filter>
+		</ResourceCompile>
+	</ItemGroup>
+</Project>

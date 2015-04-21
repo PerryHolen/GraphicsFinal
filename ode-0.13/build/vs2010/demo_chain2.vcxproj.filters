@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="drawstuff">
+			<UniqueIdentifier>{C18EC295-41F9-2647-A4AB-C0D0E246CB47}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="drawstuff\src">
+			<UniqueIdentifier>{337C8E6A-9569-FE42-90AD-69E5EB89B492}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="ode">
+			<UniqueIdentifier>{A8FCFF35-7203-6943-B7F8-5A8D61D2598E}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="ode\demo">
+			<UniqueIdentifier>{5A35315F-0721-674F-BC12-68F2E213E339}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\ode\demo\demo_chain2.cpp">
+			<Filter>ode\demo</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ResourceCompile Include="..\..\drawstuff\src\resources.rc">
+			<Filter>drawstuff\src</Filter>
+		</ResourceCompile>
+	</ItemGroup>
+</Project>

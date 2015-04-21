@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ode">
+      <UniqueIdentifier>{9c6a6255-b900-4e4c-be08-18b12261e7fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ode\demo">
+      <UniqueIdentifier>{a6705d12-0a96-40ca-8723-f557e2dde547}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drawstuff">
+      <UniqueIdentifier>{08ff957c-d379-486f-9f2b-d1c700709215}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drawstuff\src">
+      <UniqueIdentifier>{62a7bcac-88ac-4fe0-af4e-72b0b0245aeb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\ode\demo\demo_plane2d.cpp">
+      <Filter>ode\demo</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\drawstuff\src\resources.rc">
+      <Filter>drawstuff\src</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
