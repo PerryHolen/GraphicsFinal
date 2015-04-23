@@ -197,6 +197,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\ode\demo\demo_buggy.cpp" />
+    <ClCompile Include="StateVariables.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\drawstuff\src\resources.rc" />
@@ -210,6 +211,9 @@
       <Project>{fb77dbfa-e3ad-b14f-9399-19e47c03b007}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="StateVariables.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
