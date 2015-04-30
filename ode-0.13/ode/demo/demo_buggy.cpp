@@ -55,6 +55,8 @@ static dReal speed=0,steer=0;	// user commands
 
 
 
+
+
 // this is called by dSpaceCollide when two objects in space are
 // potentially colliding.
 
