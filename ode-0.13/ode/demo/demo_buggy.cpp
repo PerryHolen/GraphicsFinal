@@ -11,7 +11,7 @@ bicycle.
 
 #ifdef _MSC_VER
 #pragma warning(disable:4244 4305)  // for VC++, no precision loss complaints
-#endif
+#endif 
 
 // select correct drawing functions
 
@@ -24,31 +24,36 @@ bicycle.
 
 
 // some constants
+#define RLENGTH 0.2	// Rider length
+#define RWIDTH 0.2	// Rider width
+#define RHEIGHT 0.45	// Rider height
+#define RMASS 10
 
 #define LENGTH 0.7	// chassis length
 #define WIDTH 0.15	// chassis width
 #define HEIGHT 0.45	// chassis height
 #define RADIUS 0.18	// wheel radius
-#define WHEEL_WIDTH .05
+#define WHEEL_WIDTH .15
 #define STARTZ 0.5	// starting height of chassis
 #define CMASS 1		// chassis mass
-#define WMASS 0.2	// wheel mass
+#define WMASS 0.5	// wheel mass
 
 
 // dynamics and collision objects (chassis, 3 wheels, environment)
 
 static dWorldID world;
 static dSpaceID space;
-static dBodyID body[3];
-static dJointID joint[2];	// joint[0] is the front wheel
+static dBodyID body[4];
+static dJointID joint[3];	// joint[0] is the front wheel
 static dJointGroupID contactgroup;
 static dGeomID ground;
 static dSpaceID car_space;
-static dGeomID box[1];
+static dGeomID box[2];
 static dGeomID wheels[2];
 static dGeomID ground_box;
 
-
+void destroy();
+void init();
 
 // things that the user controls
 
@@ -121,14 +126,16 @@ static void command (int cmd)
     speed -= 0.3;
     break;
   case ',':
-    steer -= 0.5;
+    steer -= 0.2;
     break;
   case '.':
-    steer += 0.5;
+    steer += 0.2;
     break;
   case ' ':
     speed = 0;
     steer = 0;
+	destroy();
+	init();
     break;
   case '1': {
       FILE *f = fopen ("state.dif","wt");
@@ -148,8 +155,8 @@ static void simLoop (int pause)
   int i;
   if (!pause) {
     // motor
-    dJointSetHinge2Param (joint[0],dParamVel2,-speed);
-    dJointSetHinge2Param (joint[0],dParamFMax2,0.1);
+    dJointSetHinge2Param (joint[1],dParamVel2,-speed);
+    dJointSetHinge2Param (joint[1],dParamFMax2,0.1);
 
     // steering
     dReal v = steer - dJointGetHinge2Angle1 (joint[0]);
@@ -172,10 +179,12 @@ static void simLoop (int pause)
   dsSetColor (0,1,1);
   dsSetTexture (DS_WOOD);
   dReal sides[3] = {LENGTH,WIDTH,HEIGHT};
+  dReal rsides[3] = { RLENGTH, RWIDTH, RHEIGHT };
   dsDrawBox (dBodyGetPosition(body[0]),dBodyGetRotation(body[0]),sides);
+  dsDrawBox(dBodyGetPosition(body[3]), dBodyGetRotation(body[3]), rsides);
   dsSetColor (1,1,1);
   for (i=1; i<=2; i++) dsDrawCylinder (dBodyGetPosition(body[i]),
-				       dBodyGetRotation(body[i]),0.02f,RADIUS);
+				       dBodyGetRotation(body[i]),WHEEL_WIDTH,RADIUS);
 
   dVector3 ss;
   dGeomBoxGetLengths (ground_box,ss);
@@ -190,11 +199,124 @@ static void simLoop (int pause)
   */
 }
 
+void destroy(){
+	dGeomDestroy(box[0]);
+	dGeomDestroy(box[1]);
+	dGeomDestroy(wheels[0]);
+	dGeomDestroy(wheels[1]);
+	//dGeomDestroy (sphere[2]);
+	dJointGroupDestroy(contactgroup);
+	dSpaceDestroy(space);
+	dWorldDestroy(world);
+}
+
+void init(){
+	int i;
+	dMass m;
+
+	// create world
+	dInitODE2(0);
+	world = dWorldCreate();
+	space = dHashSpaceCreate(0);
+	contactgroup = dJointGroupCreate(0);
+	dWorldSetGravity(world, 0, 0, -0.5);
+	ground = dCreatePlane(space, 0, 0, 1, 0);
+
+	// chassis body
+	body[0] = dBodyCreate(world);
+	dBodySetPosition(body[0], 0, 0, STARTZ);
+	dMassSetBox(&m, 1, LENGTH, WIDTH, HEIGHT);
+	dMassAdjust(&m, CMASS);
+	dBodySetMass(body[0], &m);
+	box[0] = dCreateBox(0, LENGTH, WIDTH, HEIGHT);
+	dGeomSetBody(box[0], body[0]);
+
+	//rider body
+	body[3] = dBodyCreate(world);
+	dBodySetPosition(body[3], 0, 0, STARTZ + HEIGHT);
+	dMassSetBox(&m, 1, RLENGTH, RWIDTH, RHEIGHT);
+	dMassAdjust(&m, RMASS);
+	dBodySetMass(body[3], &m);
+	box[1] = dCreateBox(0, RLENGTH, RWIDTH, RHEIGHT);
+	dGeomSetBody(box[1], body[3]);
+
+	// wheel bodies
+	for (i = 1; i <= 2; i++) {
+
+		body[i] = dBodyCreate(world);
+		dQuaternion q;
+		dQFromAxisAndAngle(q, 1, 0, 0, M_PI*0.5);
+		dBodySetQuaternion(body[i], q);
+		dMassSetCylinderTotal(&m, WMASS, 2, RADIUS, WHEEL_WIDTH);
+		//dMassSetSphere (&m,1,RADIUS);
+		dMassAdjust(&m, WMASS);
+		dBodySetMass(body[i], &m);
+		wheels[i - 1] = dCreateCylinder(0, RADIUS, WHEEL_WIDTH);
+		//sphere[i-1] = dCreateSphere (0,RADIUS);
+		dGeomSetBody(wheels[i - 1], body[i]);
+	}
+	dBodySetPosition(body[1], 0.5*LENGTH, 0, STARTZ - HEIGHT*0.5);
+	dBodySetPosition(body[2], -0.5*LENGTH, 0, STARTZ - HEIGHT*0.5);
+	// dBodySetPosition (body[3],-0.5*LENGTH,-WIDTH*0.5,STARTZ-HEIGHT*0.5);
+
+	// front wheel hinge
+	/*
+	joint[0] = dJointCreateHinge2 (world,0);
+	dJointAttach (joint[0],body[0],body[1]);
+	const dReal *a = dBodyGetPosition (body[1]);
+	dJointSetHinge2Anchor (joint[0],a[0],a[1],a[2]);
+	dJointSetHinge2Axis1 (joint[0],0,0,1);
+	dJointSetHinge2Axis2 (joint[0],0,1,0);
+	*/
+
+	// front and back wheel hinges
+	for (i = 0; i<2; i++) {
+		joint[i] = dJointCreateHinge2(world, 0);
+		dJointAttach(joint[i], body[0], body[i + 1]);
+		const dReal *a = dBodyGetPosition(body[i + 1]);
+		dJointSetHinge2Anchor(joint[i], a[0], a[1], a[2]);
+		dJointSetHinge2Axis1(joint[i], 0, 0, 1);
+		dJointSetHinge2Axis2(joint[i], 0, 1, 0);
+	}
+
+	// set joint suspension
+	for (i = 0; i<2; i++) {
+		dJointSetHinge2Param(joint[i], dParamSuspensionERP, 0.4);
+		dJointSetHinge2Param(joint[i], dParamSuspensionCFM, 0.8);
+	}
+
+	// lock back wheels along the steering axis
+	for (i = 1; i<2; i++) {
+		// set stops to make sure wheels always stay in alignment
+		dJointSetHinge2Param(joint[i], dParamLoStop, 0);
+		dJointSetHinge2Param(joint[i], dParamHiStop, 0);
+		// the following alternative method is no good as the wheels may get out
+		// of alignment:
+		//   dJointSetHinge2Param (joint[i],dParamVel,0);
+		//   dJointSetHinge2Param (joint[i],dParamFMax,dInfinity);
+	}
+
+	// create car space and add it to the top level space
+	car_space = dSimpleSpaceCreate(space);
+	dSpaceSetCleanup(car_space, 0);
+	dSpaceAdd(car_space, box[0]);
+	dSpaceAdd(car_space, box[1]);
+	dSpaceAdd(car_space, wheels[0]);
+	dSpaceAdd(car_space, wheels[1]);
+	//dSpaceAdd (car_space,sphere[2]);
+
+	// environment
+	ground_box = dCreateBox(space, 2, 1.5, 1);
+	dMatrix3 R;
+	dRFromAxisAndAngle(R, 0, 1, 0, -0.15);
+	dGeomSetPosition(ground_box, 2, 0, -0.34);
+	dGeomSetRotation(ground_box, R);
+}
+
 
 int main (int argc, char **argv)
 {
-  int i;
-  dMass m;
+
 
   // setup pointers to drawstuff callback functions
   dsFunctions fn;
@@ -205,104 +327,13 @@ int main (int argc, char **argv)
   fn.stop = 0;
   fn.path_to_textures = DRAWSTUFF_TEXTURE_PATH;
 
-  // create world
-  dInitODE2(0);
-  world = dWorldCreate();
-  space = dHashSpaceCreate (0);
-  contactgroup = dJointGroupCreate (0);
-  dWorldSetGravity (world,0,0,-0.5);
-  ground = dCreatePlane (space,0,0,1,0);
 
-  // chassis body
-  body[0] = dBodyCreate (world);
-  dBodySetPosition (body[0],0,0,STARTZ);
-  dMassSetBox (&m,1,LENGTH,WIDTH,HEIGHT);
-  dMassAdjust (&m,CMASS);
-  dBodySetMass (body[0],&m);
-  box[0] = dCreateBox (0,LENGTH,WIDTH,HEIGHT);
-  dGeomSetBody (box[0],body[0]);
 
-  // wheel bodies
-  for (i=1; i<=2; i++) {
-	  
-    body[i] = dBodyCreate (world);
-    dQuaternion q;
-    dQFromAxisAndAngle (q,1,0,0,M_PI*0.5);
-    dBodySetQuaternion (body[i],q);
-	dMassSetCylinderTotal(&m, WMASS, 2, RADIUS, WHEEL_WIDTH);
-    //dMassSetSphere (&m,1,RADIUS);
-    dMassAdjust (&m,WMASS);
-    dBodySetMass (body[i],&m);
-	wheels[i - 1] = dCreateCylinder(0, RADIUS, WHEEL_WIDTH);
-    //sphere[i-1] = dCreateSphere (0,RADIUS);
-    dGeomSetBody (wheels[i-1],body[i]);
-  }
-  dBodySetPosition (body[1],0.5*LENGTH,0,STARTZ-HEIGHT*0.5);
-  dBodySetPosition (body[2],-0.5*LENGTH, 0,STARTZ-HEIGHT*0.5);
-  // dBodySetPosition (body[3],-0.5*LENGTH,-WIDTH*0.5,STARTZ-HEIGHT*0.5);
-
-  // front wheel hinge
-  /*
-  joint[0] = dJointCreateHinge2 (world,0);
-  dJointAttach (joint[0],body[0],body[1]);
-  const dReal *a = dBodyGetPosition (body[1]);
-  dJointSetHinge2Anchor (joint[0],a[0],a[1],a[2]);
-  dJointSetHinge2Axis1 (joint[0],0,0,1);
-  dJointSetHinge2Axis2 (joint[0],0,1,0);
-  */
-
-  // front and back wheel hinges
-  for (i=0; i<2; i++) {
-    joint[i] = dJointCreateHinge2 (world,0);
-    dJointAttach (joint[i],body[0],body[i+1]);
-    const dReal *a = dBodyGetPosition (body[i+1]);
-    dJointSetHinge2Anchor (joint[i],a[0],a[1],a[2]);
-    dJointSetHinge2Axis1 (joint[i],0,0,1);
-    dJointSetHinge2Axis2 (joint[i],0,1,0);
-  }
-
-  // set joint suspension
-  for (i=0; i<2; i++) {
-    dJointSetHinge2Param (joint[i],dParamSuspensionERP,0.4);
-    dJointSetHinge2Param (joint[i],dParamSuspensionCFM,0.8);
-  }
-
-  // lock back wheels along the steering axis
-  for (i=1; i<2; i++) {
-    // set stops to make sure wheels always stay in alignment
-    dJointSetHinge2Param (joint[i],dParamLoStop,0);
-    dJointSetHinge2Param (joint[i],dParamHiStop,0);
-    // the following alternative method is no good as the wheels may get out
-    // of alignment:
-    //   dJointSetHinge2Param (joint[i],dParamVel,0);
-    //   dJointSetHinge2Param (joint[i],dParamFMax,dInfinity);
-  }
-
-  // create car space and add it to the top level space
-  car_space = dSimpleSpaceCreate (space);
-  dSpaceSetCleanup (car_space,0);
-  dSpaceAdd (car_space,box[0]);
-  dSpaceAdd (car_space,wheels[0]);
-  dSpaceAdd (car_space,wheels[1]);
-  //dSpaceAdd (car_space,sphere[2]);
-
-  // environment
-  ground_box = dCreateBox (space,2,1.5,1);
-  dMatrix3 R;
-  dRFromAxisAndAngle (R,0,1,0,-0.15);
-  dGeomSetPosition (ground_box,2,0,-0.34);
-  dGeomSetRotation (ground_box,R);
+  init();
 
   // run simulation
-  dsSimulationLoop (argc,argv,352,288,&fn);
-
-  dGeomDestroy (box[0]);
-  dGeomDestroy (wheels[0]);
-  dGeomDestroy (wheels[1]);
-  //dGeomDestroy (sphere[2]);
-  dJointGroupDestroy (contactgroup);
-  dSpaceDestroy (space);
-  dWorldDestroy (world);
+  dsSimulationLoop (argc,argv,1000,1000,&fn);
+  destroy();
   dCloseODE();
   return 0;
 }
