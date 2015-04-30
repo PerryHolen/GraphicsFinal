@@ -26,9 +26,10 @@ bicycle.
 // some constants
 
 #define LENGTH 0.7	// chassis length
-#define WIDTH 0.5	// chassis width
-#define HEIGHT 0.2	// chassis height
+#define WIDTH 0.15	// chassis width
+#define HEIGHT 0.45	// chassis height
 #define RADIUS 0.18	// wheel radius
+#define WHEEL_WIDTH .05
 #define STARTZ 0.5	// starting height of chassis
 #define CMASS 1		// chassis mass
 #define WMASS 0.2	// wheel mass
@@ -44,7 +45,7 @@ static dJointGroupID contactgroup;
 static dGeomID ground;
 static dSpaceID car_space;
 static dGeomID box[1];
-static dGeomID sphere[2];
+static dGeomID wheels[2];
 static dGeomID ground_box;
 
 
@@ -223,15 +224,18 @@ int main (int argc, char **argv)
 
   // wheel bodies
   for (i=1; i<=2; i++) {
+	  
     body[i] = dBodyCreate (world);
     dQuaternion q;
     dQFromAxisAndAngle (q,1,0,0,M_PI*0.5);
     dBodySetQuaternion (body[i],q);
-    dMassSetSphere (&m,1,RADIUS);
+	dMassSetCylinderTotal(&m, WMASS, 2, RADIUS, WHEEL_WIDTH);
+    //dMassSetSphere (&m,1,RADIUS);
     dMassAdjust (&m,WMASS);
     dBodySetMass (body[i],&m);
-    sphere[i-1] = dCreateSphere (0,RADIUS);
-    dGeomSetBody (sphere[i-1],body[i]);
+	wheels[i - 1] = dCreateCylinder(0, RADIUS, WHEEL_WIDTH);
+    //sphere[i-1] = dCreateSphere (0,RADIUS);
+    dGeomSetBody (wheels[i-1],body[i]);
   }
   dBodySetPosition (body[1],0.5*LENGTH,0,STARTZ-HEIGHT*0.5);
   dBodySetPosition (body[2],-0.5*LENGTH, 0,STARTZ-HEIGHT*0.5);
@@ -278,8 +282,8 @@ int main (int argc, char **argv)
   car_space = dSimpleSpaceCreate (space);
   dSpaceSetCleanup (car_space,0);
   dSpaceAdd (car_space,box[0]);
-  dSpaceAdd (car_space,sphere[0]);
-  dSpaceAdd (car_space,sphere[1]);
+  dSpaceAdd (car_space,wheels[0]);
+  dSpaceAdd (car_space,wheels[1]);
   //dSpaceAdd (car_space,sphere[2]);
 
   // environment
@@ -293,8 +297,8 @@ int main (int argc, char **argv)
   dsSimulationLoop (argc,argv,352,288,&fn);
 
   dGeomDestroy (box[0]);
-  dGeomDestroy (sphere[0]);
-  dGeomDestroy (sphere[1]);
+  dGeomDestroy (wheels[0]);
+  dGeomDestroy (wheels[1]);
   //dGeomDestroy (sphere[2]);
   dJointGroupDestroy (contactgroup);
   dSpaceDestroy (space);
