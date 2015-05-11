@@ -68,8 +68,8 @@ Population::Population(std::vector<Genome*> genomeList, float power) {
 	highest_last_changed=0;
 		
 	int count;
-	Genome *new_genome;
-	Organism *new_organism;
+	Genome *new_genome = NULL;
+	Organism *new_organism = NULL;
 
 	//Create size copies of the Genome
 	//Start with perturbed linkweights
@@ -99,7 +99,7 @@ Population::Population(const char *filename) {
 	char curline[1024]; //max line size of 1024 characters
 	char delimiters[] = " \n";
 
-	Genome *new_genome;
+	Genome *new_genome = NULL;
 
 	winnergen=0;
 
@@ -236,7 +236,7 @@ bool Population::verify() {
 
 bool Population::clone(Genome *g,int size, float power) {
 	int count;
-	Genome *new_genome;
+	Genome *new_genome = NULL;
 	Organism *new_organism;
 
 	new_genome = g->duplicate(1); 
@@ -268,7 +268,7 @@ bool Population::clone(Genome *g,int size, float power) {
 
 bool Population::spawn(Genome *g,int size) {
 	int count;
-	Genome *new_genome;
+	Genome *new_genome = NULL;
 	Organism *new_organism;
 
 	//Create size copies of the Genome
@@ -425,7 +425,7 @@ bool Population::epoch(int generation) {
 	int total_expected;  //precision checking
 	int total_organisms=organisms.size();
 	int max_expected;
-	Species *best_species;
+	Species *best_species = NULL;
 	int final_expected;
 
 	int pause;

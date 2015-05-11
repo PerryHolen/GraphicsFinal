@@ -107,15 +107,6 @@ int main(int argc, char *argv[]) {
 
   switch ( choice )
     {
-    case 1:
-      p = pole1_test(100);
-      break;
-    case 2:
-      p = pole2_test(100,1);
-      break;
-    case 3:
-      p = pole2_test(100,0);
-      break;
     case 4:
       p=xor_test(100);
       break;
