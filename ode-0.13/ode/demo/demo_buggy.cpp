@@ -57,7 +57,7 @@ void init();
 
 // things that the user controls
 
-static dReal speed=0,steer=0;	// user commands
+static dReal speed=0,steer=0,lean=0;	// user commands
 
 
 
@@ -125,6 +125,12 @@ static void command (int cmd)
   case 'z': case 'Z':
     speed -= 0.3;
     break;
+  case 's': case 'S':
+	  lean += 0.3;
+	  break;
+  case 'x': case 'X':
+	  lean -= 0.3;
+	  break;
   case ',':
     steer -= 0.2;
     break;
@@ -134,6 +140,7 @@ static void command (int cmd)
   case ' ':
     speed = 0;
     steer = 0;
+	lean = 0;
 	destroy();
 	init();
     break;
@@ -168,6 +175,17 @@ static void simLoop (int pause)
     dJointSetHinge2Param (joint[0],dParamLoStop,-0.75);
     dJointSetHinge2Param (joint[0],dParamHiStop,0.75);
     dJointSetHinge2Param (joint[0],dParamFudgeFactor,0.1);
+
+	//Rider Lean
+	dReal l = lean - dJointGetHingeAngle(joint[2]);
+	if (v > 0.1) v = 0.1;
+	if (v < -0.1) v = -0.1;
+	v *= 10.0;
+	dJointSetHingeParam(joint[2], dParamVel, l);
+	dJointSetHingeParam(joint[2], dParamFMax, 0.2);
+	dJointSetHingeParam(joint[2], dParamLoStop, -0.75);
+	dJointSetHingeParam(joint[2], dParamHiStop, 0.75);
+	dJointSetHingeParam(joint[2], dParamFudgeFactor, 0.1);
 
     dSpaceCollide (space,0,&nearCallback);
     dWorldStep (world,0.05);
@@ -248,26 +266,25 @@ void init(){
 		dQFromAxisAndAngle(q, 1, 0, 0, M_PI*0.5);
 		dBodySetQuaternion(body[i], q);
 		dMassSetCylinderTotal(&m, WMASS, 2, RADIUS, WHEEL_WIDTH);
-		//dMassSetSphere (&m,1,RADIUS);
 		dMassAdjust(&m, WMASS);
 		dBodySetMass(body[i], &m);
 		wheels[i - 1] = dCreateCylinder(0, RADIUS, WHEEL_WIDTH);
-		//sphere[i-1] = dCreateSphere (0,RADIUS);
 		dGeomSetBody(wheels[i - 1], body[i]);
 	}
 	dBodySetPosition(body[1], 0.5*LENGTH, 0, STARTZ - HEIGHT*0.5);
 	dBodySetPosition(body[2], -0.5*LENGTH, 0, STARTZ - HEIGHT*0.5);
-	// dBodySetPosition (body[3],-0.5*LENGTH,-WIDTH*0.5,STARTZ-HEIGHT*0.5);
 
-	// front wheel hinge
-	/*
-	joint[0] = dJointCreateHinge2 (world,0);
-	dJointAttach (joint[0],body[0],body[1]);
-	const dReal *a = dBodyGetPosition (body[1]);
-	dJointSetHinge2Anchor (joint[0],a[0],a[1],a[2]);
-	dJointSetHinge2Axis1 (joint[0],0,0,1);
-	dJointSetHinge2Axis2 (joint[0],0,1,0);
-	*/
+
+
+	// Rider Hinge
+	joint[2] = dJointCreateHinge(world, 0);
+	dJointAttach(joint[2], body[0], body[3]);
+	const dReal *a = dBodyGetPosition(body[3]);
+	dJointSetHingeAnchor(joint[2], a[0], a[1], a[2]-RHEIGHT/2);
+	dJointSetHingeParam(joint[2], dParamSuspensionERP, 0);
+	dJointSetHingeParam(joint[2], dParamSuspensionCFM, 0);
+	dJointSetHingeAxis(joint[2], 1, 0, 0);
+
 
 	// front and back wheel hinges
 	for (i = 0; i<2; i++) {
@@ -281,8 +298,8 @@ void init(){
 
 	// set joint suspension
 	for (i = 0; i<2; i++) {
-		dJointSetHinge2Param(joint[i], dParamSuspensionERP, 0.4);
-		dJointSetHinge2Param(joint[i], dParamSuspensionCFM, 0.8);
+		dJointSetHinge2Param(joint[i], dParamSuspensionERP, 0);
+		dJointSetHinge2Param(joint[i], dParamSuspensionCFM, 0);
 	}
 
 	// lock back wheels along the steering axis
